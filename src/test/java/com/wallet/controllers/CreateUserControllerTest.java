@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wallet.user.dto.UserDTO;
 import com.wallet.user.entities.User;
 import com.wallet.user.services.UserService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,8 +28,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @ActiveProfiles("test")
 @WebMvcTest() // Só carrega o UserController
 @AutoConfigureMockMvc
-public class UserControllerTest {
+public class CreateUserControllerTest {
 
+    private static final Long ID = 1l;
     private static final String EMAIL = "email@test.com";
     private static final String NAME = "User Test";
     private static final String PASSWORD = "123456";
@@ -42,20 +44,36 @@ public class UserControllerTest {
 
     @Test
     @DisplayName("it should be able to save a new user")
-    public void saveUser() throws Exception {
+    public void testSaveUser() throws Exception {
 
         BDDMockito.given(userService.save(Mockito.any(User.class))).willReturn(getMockUser());
 
         mvc.perform(
                 MockMvcRequestBuilders.post(URL)
-                .content(getJsonPayload())
+                .content(getJsonPayload(ID, EMAIL, NAME, PASSWORD))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(ID))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.name").value(NAME))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.password").value(PASSWORD));
+    }
+
+    @Test
+    @DisplayName("it should not be able to save an invalid user")
+    public void testSaveIvalidUser() throws Exception {
+        mvc.perform(
+                MockMvcRequestBuilders.post(URL)
+                .content(getJsonPayload(ID, "invalid email", "na", "12")) // A validação está no dto
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("errors", Matchers.hasSize(3)));
     }
 
     public User getMockUser(){
         User user = new User();
+        user.setId(ID);
         user.setEmail(EMAIL);
         user.setName(NAME);
         user.setPassword(PASSWORD);
@@ -63,11 +81,12 @@ public class UserControllerTest {
         return user;
     }
 
-    public String getJsonPayload() throws JsonProcessingException {
+    public String getJsonPayload(Long id, String email, String name, String password) throws JsonProcessingException {
         UserDTO userDTO = new UserDTO();
-        userDTO.setEmail(EMAIL);
-        userDTO.setName(NAME);
-        userDTO.setPassword(PASSWORD);
+        userDTO.setId(id);
+        userDTO.setEmail(email);
+        userDTO.setName(name);
+        userDTO.setPassword(password);
 
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(userDTO);

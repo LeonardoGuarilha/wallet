@@ -3,17 +3,13 @@ package com.wallet.user.entities;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Data
 @Entity
-@Table(name = "user")
-public class User implements Serializable {
-
-    private static final long serialVersionUID = 1l;
-
+@Table(name = "users")
+public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Long id;
 

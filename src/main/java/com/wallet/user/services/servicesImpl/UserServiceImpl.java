@@ -3,7 +3,6 @@ package com.wallet.user.services.servicesImpl;
 import com.wallet.user.entities.User;
 import com.wallet.user.repositories.UserRepository;
 import com.wallet.user.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 

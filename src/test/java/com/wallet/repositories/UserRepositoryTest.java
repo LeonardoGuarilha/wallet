@@ -43,7 +43,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("it should save a new user")
+    @DisplayName("it should be able to save a new user")
     public void testSave(){
         // cenário
         User user = new User();
@@ -59,7 +59,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    @DisplayName("it should return a user by email")
+    @DisplayName("it should be able to return a user by email")
     public void testFindByEmail(){
         // Já tem o usuário criado no método setUp();
         // Pode ou não existir um usuário com esse email
