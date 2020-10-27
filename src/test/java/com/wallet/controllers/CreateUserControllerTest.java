@@ -2,6 +2,7 @@ package com.wallet.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wallet.user.controllers.CreateUserController;
 import com.wallet.user.dto.UserDTO;
 import com.wallet.user.entities.User;
 import com.wallet.user.services.UserService;
@@ -26,7 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@WebMvcTest() // Só carrega o UserController
+@WebMvcTest(controllers = CreateUserController.class) // Só carrega o CreateUserController
 @AutoConfigureMockMvc
 public class CreateUserControllerTest {
 

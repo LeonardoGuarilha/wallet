@@ -1,47 +1,44 @@
-package com.wallet.user.controllers;
+package com.wallet.wallet.controllers;
 
-import com.wallet.user.dto.UserDTO;
-import com.wallet.user.entities.User;
 import com.wallet.user.exceptions.ApiErrors;
 import com.wallet.user.response.Response;
-import com.wallet.user.services.UserService;
+import com.wallet.wallet.dto.WalletDTO;
+import com.wallet.wallet.entities.Wallet;
+import com.wallet.wallet.services.WalletService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("user")
-public class CreateUserController {
+@RequestMapping("wallet")
+public class CreateWalletController {
 
-    private UserService userService;
+    private WalletService walletService;
     private ModelMapper modelMapper;
 
-    public CreateUserController(UserService userService, ModelMapper modelMapper){
-        this.userService = userService;
+    public CreateWalletController(WalletService walletService, ModelMapper modelMapper){
+        this.walletService = walletService;
         this.modelMapper = modelMapper;
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Response<UserDTO>> create(@RequestBody @Valid UserDTO userDTO){
-        // O hash foi para o UserServiceImpl
-        //userDTO.setPassword(Bcrypt.getHash(userDTO.getPassword()));
-        Response<UserDTO> response = new Response<UserDTO>();
+    public ResponseEntity<Response<WalletDTO>> createWallet(@Valid @RequestBody WalletDTO walletDTO){
+        Response<WalletDTO> response = new Response<WalletDTO>();
 
-        User user = userService.save(modelMapper.map(userDTO, User.class));
-        user.setPassword(""); // Para o password ficar vazio na resposta
+        Wallet wallet = this.walletService.save(modelMapper.map(walletDTO, Wallet.class));
 
-        response.setData(modelMapper.map(user, UserDTO.class));
+        response.setData(modelMapper.map(wallet, WalletDTO.class));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // Except handler
-    // MethodArgumentNotValidException: lançado toda vez que tentamos validar um objeto(@Valid do create)
+    // MethodArgumentNotValidException: lançado toda vez que tentamos validar um objeto(@Valid do createWallet)
     // e o objeto não está valido
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -51,5 +48,4 @@ public class CreateUserController {
 
         return new ApiErrors(bindingResult);
     }
-
 }
