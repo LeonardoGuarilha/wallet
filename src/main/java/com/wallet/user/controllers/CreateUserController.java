@@ -5,6 +5,7 @@ import com.wallet.user.entities.User;
 import com.wallet.user.exceptions.ApiErrors;
 import com.wallet.user.response.Response;
 import com.wallet.user.services.UserService;
+import com.wallet.util.Bcrypt;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.PostRemove;
 import javax.validation.Valid;
 
 @RestController
@@ -29,9 +31,12 @@ public class CreateUserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Response<UserDTO>> create(@RequestBody @Valid UserDTO userDTO){
+        // O hash foi para o UserServiceImpl
+        //userDTO.setPassword(Bcrypt.getHash(userDTO.getPassword()));
         Response<UserDTO> response = new Response<UserDTO>();
 
         User user = userService.save(modelMapper.map(userDTO, User.class));
+        user.setPassword(""); // Para o password ficar vazio na resposta
 
         response.setData(modelMapper.map(user, UserDTO.class));
 

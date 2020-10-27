@@ -56,7 +56,7 @@ public class CreateUserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(ID))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.name").value(NAME))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data.password").value(PASSWORD));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.password").doesNotExist()); // para não mostrar o password na resposta
     }
 
     @Test
