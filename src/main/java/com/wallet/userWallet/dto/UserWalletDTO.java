@@ -11,7 +11,7 @@ public class UserWalletDTO {
     // Com isso, vai ser trazido somente o id
     // Se fosse FetchType.EAGER iria trazer todas as propriedades preenchidas
     @NotNull(message = "User can not be null")
-    private Long user;
+    private Long users;
 
     @NotNull(message = "Wallet can not be null")
     private Long wallet;

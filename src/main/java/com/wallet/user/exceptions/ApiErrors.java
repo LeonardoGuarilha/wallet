@@ -3,7 +3,6 @@ package com.wallet.user.exceptions;
 import org.springframework.validation.BindingResult;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ApiErrors {

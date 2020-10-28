@@ -17,11 +17,11 @@ public class UserWallet {
     private Long id;
 
     // referencedColumnName: qual coluna da tabela usuário ele vai se relacionar
-    @JoinColumn(name = "users", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "users", referencedColumnName = "id")
     private User users;
 
-    @JoinColumn(name = "wallet", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet", referencedColumnName = "id")
     private Wallet wallet;
 }
