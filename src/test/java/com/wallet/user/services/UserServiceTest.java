@@ -1,8 +1,7 @@
-package com.wallet.services;
+package com.wallet.user.services;
 
 import com.wallet.user.entities.User;
 import com.wallet.user.repositories.UserRepository;
-import com.wallet.user.services.UserService;
 import com.wallet.user.services.servicesImpl.UserServiceImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

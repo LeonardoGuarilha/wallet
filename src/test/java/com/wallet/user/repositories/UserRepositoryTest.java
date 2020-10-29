@@ -1,6 +1,5 @@
-package com.wallet.repositories;
+package com.wallet.user.repositories;
 
-import com.wallet.user.repositories.UserRepository;
 import com.wallet.user.entities.User;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;

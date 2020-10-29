@@ -1,8 +1,7 @@
-package com.wallet.controllers;
+package com.wallet.user.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wallet.user.controllers.CreateUserController;
 import com.wallet.user.dto.UserDTO;
 import com.wallet.user.entities.User;
 import com.wallet.user.services.UserService;
