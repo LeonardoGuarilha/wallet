@@ -5,17 +5,27 @@ import com.wallet.wallet.entities.Wallet;
 import com.wallet.wallet.repositories.WalletRepository;
 import com.wallet.walletItem.entities.WalletItem;
 import com.wallet.walletItem.repositories.WalletItemRepository;
+import org.aspectj.lang.annotation.Before;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -26,12 +36,34 @@ public class WalletItemRepositoryTest {
     private static final TypeEnum TYPE = TypeEnum.IN;
     private static final String DESCRIPTION = "Light bill";
     private static final BigDecimal VALUE = BigDecimal.valueOf(65);
+    private Long savedWalletItemId = null;
+    private Long savedWalletId = null;
 
     @Autowired
     private WalletItemRepository walletItemRepository;
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @BeforeEach
+    public void setUp(){
+        Wallet wallet = new Wallet();
+        wallet.setName("Carteira Teste");
+        wallet.setValue(BigDecimal.valueOf(250));
+        walletRepository.save(wallet);
+
+        WalletItem walletItem = new WalletItem(null, wallet, DATE, DESCRIPTION, TYPE, VALUE);
+        walletItemRepository.save(walletItem);
+
+        savedWalletItemId = walletItem.getId();
+        savedWalletId = wallet.getId();
+    }
+
+    @AfterEach
+    public void tearDown(){
+        walletItemRepository.deleteAll();
+        walletRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("it should be able to save a new wallet item")
@@ -52,5 +84,65 @@ public class WalletItemRepositoryTest {
         Assertions.assertThat(walletItemSaved.getValue()).isEqualTo(VALUE);
         Assertions.assertThat(walletItemSaved.getWallet().getId()).isEqualTo(wallet.getId());
 
+    }
+
+//    @Test
+//    @DisplayName("it should not save a wallet item with not enough data")
+//    public void testSaveInvalidWalletItem(){
+//        WalletItem walletItem = new WalletItem(null, null, DATE, null, null, VALUE);
+//        WalletItem savedWallet = walletItemRepository.save(walletItem);
+//
+//        Assertions.assertThat(savedWallet.getDescription()).isNull();
+//    }
+
+    @Test
+    @DisplayName("it shoud be able to update a wallet item")
+    public void testUpdateWalletItem(){
+        Optional<WalletItem> walletItem = walletItemRepository.findById(savedWalletItemId);
+
+        String description = "Descrição alterada";
+
+        WalletItem changed = walletItem.get();
+        changed.setDescription(description);
+
+        walletItemRepository.save(changed);
+
+        Optional<WalletItem> newWalletItem = walletItemRepository.findById(savedWalletItemId);
+
+        Assertions.assertThat(description).isEqualTo(newWalletItem.get().getDescription());
+    }
+
+    @Test
+    @DisplayName("it should be able to delete a wallet item")
+    public void testDeleteWalletItem(){
+        Optional<Wallet> wallet = walletRepository.findById(savedWalletId);
+        WalletItem walletItem = new WalletItem(null, wallet.get(), DATE, DESCRIPTION, TypeEnum.IN, VALUE);
+
+        walletItemRepository.save(walletItem);
+        walletItemRepository.deleteById(walletItem.getId());
+
+        Optional<WalletItem> response = walletItemRepository.findById(walletItem.getId());
+
+        Assertions.assertThat(response.isPresent()).isFalse();
+    }
+
+    @Test
+    @DisplayName("it should find wallet items between dates")
+    public void testFindBetweenDates(){
+        Optional<Wallet> wallet = walletRepository.findById(savedWalletId);
+        LocalDateTime localDateTime = DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        Date currentDatePlusFiveDays = Date.from(localDateTime.plusDays(5).atZone(ZoneId.systemDefault()).toInstant());
+        Date currentDatePlusSevenDays = Date.from(localDateTime.plusDays(7).atZone(ZoneId.systemDefault()).toInstant());
+
+        walletItemRepository.save(new WalletItem(null, wallet.get(), currentDatePlusFiveDays, DESCRIPTION, TYPE, VALUE));
+        walletItemRepository.save(new WalletItem(null, wallet.get(), currentDatePlusSevenDays, DESCRIPTION, TYPE, VALUE));
+
+        PageRequest pg = PageRequest.of(0, 10);
+        Page<WalletItem> response = walletItemRepository.findAllByWalletIdAndDateGreaterThanEqualAndDateLessThenEqual(savedWalletId, DATE, currentDatePlusFiveDays, pg);
+
+        Assertions.assertThat(response.getContent().size()).isEqualTo(2);
+        Assertions.assertThat(response.getTotalElements()).isEqualTo(2);
+        Assertions.assertThat(response.getContent().get(0).getWallet().getId()).isEqualTo(savedWalletId);
     }
 }
