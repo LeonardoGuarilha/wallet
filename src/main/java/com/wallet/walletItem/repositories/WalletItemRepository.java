@@ -10,7 +10,9 @@ import java.util.Date;
 import java.util.List;
 
 public interface WalletItemRepository extends JpaRepository<WalletItem, Long> {
-    Page<WalletItem> findAllByWalletIdAndDateGreaterThanEqualAndDateLessThenEqual(Long wallet, Date init, Date end, Pageable pg);
-
+    Page<WalletItem> findAllByWalletIdAndDateGreaterThanEqualAndDateLessThanEqual(Long wallet, Date init, Date end, Pageable pg);
     List<WalletItem> findByWalletIdAndType(Long wallet, TypeEnum type);
+
+//    @Query(value = "select sum(value) from WalletItem wi where wi.wallet.id = :wallet")
+//    BigDecimal sumByWalletId(@Param("wallet") Long wallet);
 }

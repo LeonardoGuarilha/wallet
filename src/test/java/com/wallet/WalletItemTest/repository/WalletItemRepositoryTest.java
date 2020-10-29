@@ -5,7 +5,6 @@ import com.wallet.wallet.entities.Wallet;
 import com.wallet.wallet.repositories.WalletRepository;
 import com.wallet.walletItem.entities.WalletItem;
 import com.wallet.walletItem.repositories.WalletItemRepository;
-import org.aspectj.lang.annotation.Before;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,12 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -129,17 +125,19 @@ public class WalletItemRepositoryTest {
     @Test
     @DisplayName("it should find wallet items between dates")
     public void testFindBetweenDates(){
-        Optional<Wallet> wallet = walletRepository.findById(savedWalletId);
+        Optional<Wallet> w = walletRepository.findById(savedWalletId);
+
         LocalDateTime localDateTime = DATE.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         Date currentDatePlusFiveDays = Date.from(localDateTime.plusDays(5).atZone(ZoneId.systemDefault()).toInstant());
         Date currentDatePlusSevenDays = Date.from(localDateTime.plusDays(7).atZone(ZoneId.systemDefault()).toInstant());
 
-        walletItemRepository.save(new WalletItem(null, wallet.get(), currentDatePlusFiveDays, DESCRIPTION, TYPE, VALUE));
-        walletItemRepository.save(new WalletItem(null, wallet.get(), currentDatePlusSevenDays, DESCRIPTION, TYPE, VALUE));
+
+        walletItemRepository.save(new WalletItem(null, w.get(), currentDatePlusFiveDays, DESCRIPTION, TYPE, VALUE));
+        walletItemRepository.save(new WalletItem(null, w.get(), currentDatePlusSevenDays, DESCRIPTION, TYPE, VALUE));
 
         PageRequest pg = PageRequest.of(0, 10);
-        Page<WalletItem> response = walletItemRepository.findAllByWalletIdAndDateGreaterThanEqualAndDateLessThenEqual(savedWalletId, DATE, currentDatePlusFiveDays, pg);
+        Page<WalletItem> response = walletItemRepository.findAllByWalletIdAndDateGreaterThanEqualAndDateLessThanEqual(savedWalletId, DATE, currentDatePlusFiveDays, pg);
 
         Assertions.assertThat(response.getContent().size()).isEqualTo(2);
         Assertions.assertThat(response.getTotalElements()).isEqualTo(2);
