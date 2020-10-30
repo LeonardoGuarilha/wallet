@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
@@ -143,4 +144,38 @@ public class WalletItemRepositoryTest {
         Assertions.assertThat(response.getTotalElements()).isEqualTo(2);
         Assertions.assertThat(response.getContent().get(0).getWallet().getId()).isEqualTo(savedWalletId);
     }
+
+    @Test
+    @DisplayName("it should be able to find wallet items by type")
+    public void testFindByType() {
+        List<WalletItem> response = walletItemRepository.findByWalletIdAndType(savedWalletId, TYPE);
+
+        Assertions.assertThat(response.size()).isEqualTo(1);
+        Assertions.assertThat(response.get(0).getWallet().getId()).isEqualTo(savedWalletId);
+    }
+
+    @Test
+    @DisplayName("it should be able to find wallet items by type OC")
+    public void testFindByTypeOC() {
+        Optional<Wallet> wallet = walletRepository.findById(savedWalletId);
+        walletItemRepository.save(new WalletItem(null, wallet.get(), DATE, DESCRIPTION, TypeEnum.OC, VALUE));
+
+        List<WalletItem> response = walletItemRepository.findByWalletIdAndType(savedWalletId, TypeEnum.OC);
+
+        Assertions.assertThat(response.size()).isEqualTo(1);
+        Assertions.assertThat(response.get(0).getType()).isEqualTo(TypeEnum.OC);
+    }
+
+    @Test
+    @DisplayName("it should be able to sum wallet items inside a wallet")
+    public void testSumByWallet() {
+        Optional<Wallet> wallet = walletRepository.findById(savedWalletId);
+        walletItemRepository.save(new WalletItem(null, wallet.get(), DATE, DESCRIPTION, TYPE, BigDecimal.valueOf(150.80)));
+
+        BigDecimal response = walletItemRepository.sumByWalletId(savedWalletId);
+
+        Assertions.assertThat(response.compareTo(BigDecimal.valueOf(215.8)));
+    }
+
+
 }
